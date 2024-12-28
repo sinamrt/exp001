@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  # MySQL database service
+  db:
+    image: mysql:latest
+    container_name: mysql-container
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=myuser
+      - MYSQL_PASSWORD=mypassword
+    ports:
+      - "3306:3306"
+    # If you want to persist MySQL data to the host, usually you'd do:
+    # volumes:
+    #   - ./mysql-data:/var/lib/mysql
+    # But you listed a full path, which is also valid:
+    volumes:
+      - mysql-data:/Users/sina/Desktop/practice_code/repos/database
+    networks:
+      - my-network
+    restart: always
+
+  # Express.js web service
+  web:
+    build:
+      context: .
+      # If your Dockerfile is named exactly "Dockerfile" and is in the same directory,
+      # you can omit the "dockerfile" line:
+      dockerfile: ./docker
+    container_name: express-container
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_USER=myuser
+      - DB_PASS=mypassword
+      - DB_NAME=mydatabase
+    depends_on:
+      - db
+    networks:
+      - my-network
+
+volumes:
+  mysql-data:
+
+networks:
+  my-network:
